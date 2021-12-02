@@ -1,9 +1,13 @@
+const size = 170; /* this gets it under 256 kb after render */
+
 var cvs = document.getElementById("image");
+cvs.width = size;
+cvs.height = size;
 var ctx = cvs.getContext("2d");
 
 const pps = 1/3;
 var particles = [];
-let fn = (p) => { return Math.pow(p.x, 2) + Math.pow(p.y+cvs.height, 2); };
+let fn = (p) => { return Math.pow(p.x, 2) + Math.pow(p.y+size, 2); };
 var gif = null;
 
 document.getElementById("img-input").onchange = () => {
@@ -12,24 +16,21 @@ document.getElementById("img-input").onchange = () => {
     let img = new Image();
     img.src = URL.createObjectURL(input);
     img.onload = () => {
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-        ctx.fillStyle = "rgb(0, 255, 0)";
-        ctx.fillRect(0, 0, cvs.width, cvs.height);
-        ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
 
         particles = [];
         gif = new GIF({
             workers: 2,
             quality: 10,
-            transparent: 0x00FF00,
+            transparent: 0x00FE00,
         });
-        gif.addFrame(cvs, { copy: true });
 
-        let data = ctx.getImageData(0, 0, cvs.width, cvs.height).data;
+        let data = ctx.getImageData(0, 0, size, size).data;
 
-        for (let i = 0; i < cvs.width; ++i) {
-            for (let j = 0; j < cvs.height; ++j) {
-                let p = new Particle(i, j, data.slice(4*(j*cvs.width+i), 4*(j*cvs.width+i)+4));
+        for (let i = 0; i < size; ++i) {
+            for (let j = 0; j < size; ++j) {
+                let p = new Particle(i, j, data.slice(4*(j*size+i), 4*(j*size+i)+4));
                 particles.push(p);
             }
         }
@@ -45,24 +46,32 @@ function sleep(ms) {
 };
 
 async function run() {
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = "rgb(0, 254, 0)";
+    ctx.fillRect(0, 0, size, size);
+    for (let p of particles) {
+        p.draw(ctx);
+    }
+    gif.addFrame(cvs, { copy: true });
+
     let i = 0, endframes = 0;
     while (endframes < 0.5*framerate) {
-        await sleep(5);
+        await sleep(1);
 
         let done = true;
 
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-        ctx.fillStyle = "rgb(0, 255, 0)";
-        ctx.fillRect(0, 0, cvs.width, cvs.height);
+        ctx.clearRect(0, 0, size, size);
+        ctx.fillStyle = "rgb(0, 254, 0)";
+        ctx.fillRect(0, 0, size, size);
 
         for (let j = 0; j < particles.length; ++j) {
-            if (Math.sqrt(fn(particles[j])) > Math.sqrt(5)*cvs.height*(1-i*pps/framerate))
+            if (Math.sqrt(fn(particles[j])) > Math.sqrt(5)*size*(1-i*pps/framerate))
                 particles[j].fixed = false;   
         }
         for (let p of particles) {
             p.update();
             p.draw(ctx);
-            if (!(0 > p.x || 0 > p.y || cvs.width < p.x || cvs.height < p.y)) {
+            if (!(0 > p.x || 0 > p.y || size <= p.x || size <= p.y)) {
                 done = false;
             }
         }
@@ -72,7 +81,7 @@ async function run() {
         }
         i += 1;
 
-        gif.addFrame(cvs, { delay: 1000/framerate, copy: true });
+        gif.addFrame(cvs, { delay: 1000/framerate/speedup, copy: true });
     }
 
     gif.on("finished", function(blob) {

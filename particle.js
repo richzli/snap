@@ -1,4 +1,5 @@
-const framerate = 24;
+const framerate = 15;
+const speedup = 1.5;
 const vx_base = 100;
 const vy_base = 20;
 const gravity = -100;
@@ -21,7 +22,7 @@ function Particle(x, y, color) {
     this.y = y;
     this.vx = Math.random()*vx_base - vx_base*(255-x)/255;
     this.vy = -Math.random()*vy_base;
-    this.color = [color[0], color[1], color[2], color[3]];
+    this.color = [color[0], color[1], color[2], Math.floor(color[3])];
     this.fixed = true;
     this.update = () => {
         if (!this.fixed) {
