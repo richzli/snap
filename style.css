@@ -1,0 +1,24 @@
+.image-display {
+    width: 256px;
+    height: 256px;
+
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
+    border: 1px solid black;
+
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.button-div {
+    width: 256px;
+
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    display: flex;
+
+    justify-content: center;
+}
