@@ -1,11 +1,11 @@
-const size = 170; /* this gets it under 256 kb after render */
+const size = 160;
 
 var cvs = document.getElementById("image");
 cvs.width = size;
 cvs.height = size;
 var ctx = cvs.getContext("2d");
 
-const pps = 1/3;
+const pps = 2/3;
 var particles = [];
 let fn = (p) => { return Math.pow(p.x, 2) + Math.pow(p.y+size, 2); };
 var gif = null;
@@ -23,7 +23,8 @@ document.getElementById("img-input").onchange = () => {
         gif = new GIF({
             workers: 2,
             quality: 10,
-            transparent: 0x00FE00,
+            transparent: 0x00FF00,
+            background: 0x00FF00,
         });
 
         let data = ctx.getImageData(0, 0, size, size).data;
@@ -47,7 +48,7 @@ function sleep(ms) {
 
 async function run() {
     ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = "rgb(0, 254, 0)";
+    ctx.fillStyle = "rgb(0, 255, 0)";
     ctx.fillRect(0, 0, size, size);
     for (let p of particles) {
         p.draw(ctx);
@@ -56,12 +57,12 @@ async function run() {
 
     let i = 0, endframes = 0;
     while (endframes < 0.5*framerate) {
-        await sleep(1);
+        await sleep(1); /* so the in-process images actually get displayed on screen */
 
         let done = true;
 
         ctx.clearRect(0, 0, size, size);
-        ctx.fillStyle = "rgb(0, 254, 0)";
+        ctx.fillStyle = "rgb(0, 255, 0)";
         ctx.fillRect(0, 0, size, size);
 
         for (let j = 0; j < particles.length; ++j) {
