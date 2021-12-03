@@ -2,6 +2,8 @@
 
 :boohooa:
 
+![](snap.gif)
+
 takes an image and thanos snaps it
 
 works best with images that have a lot of transparent pixels, like emoji
